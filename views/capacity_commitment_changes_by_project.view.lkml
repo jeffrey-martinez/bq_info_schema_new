@@ -5,7 +5,7 @@ view: capacity_commitment_changes_by_project {
   IF(commitment_plan != 'MONTHLY', 0, IF(action IN ('UPDATE', 'CREATE'), slot_count, slot_count * -1)) as monthly_change,
   IF(commitment_plan != 'ANNUAL', 0, IF(action IN ('UPDATE', 'CREATE'), slot_count, slot_count * -1)) as annual_change,
   LEAD(change_timestamp, 1) OVER(ORDER BY change_timestamp ASC) next_change_timestamp
-FROM `zr-prod-data-warehouse.region-us.INFORMATION_SCHEMA.CAPACITY_COMMITMENT_CHANGES_BY_PROJECT` WHERE state = 'ACTIVE')
+FROM `region-us.INFORMATION_SCHEMA.CAPACITY_COMMITMENT_CHANGES_BY_PROJECT` WHERE state = 'ACTIVE')
 
 SELECT change_timestamp, next_change_timestamp, project_id, capacity_commitment_id,
   SUM(annual_change) OVER(order by change_timestamp asc rows between unbounded preceding and current row) as annual_slot_count,

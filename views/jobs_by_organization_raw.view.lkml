@@ -317,7 +317,7 @@ dimension: reporting_period {
   dimension: query_total_slot {
     label: "Average Slots Used for a Query"
     type: number
-    sql: ${total_slot_ms}/${duration_milliseconds} ;;
+    sql: ${total_slot_ms}/NULLIF(${duration_milliseconds},0) ;;
     drill_fields: [job_id,total_gb_processed]
   }
 
