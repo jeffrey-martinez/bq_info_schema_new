@@ -31,47 +31,34 @@ view: jobs_by_organization_raw {
     sql: ${TABLE}.creation_time ;;
   }
 
-  dimension: 5_min_reporting_periods {
+  dimension: 3_hour_reporting_periods {
     sql: CASE
-        WHEN TIMESTAMP_DIFF(CURRENT_TIMESTAMP(),${creation_raw},minute) <= 5
-        THEN 'Last 5 Min'
-        WHEN TIMESTAMP_DIFF(CURRENT_TIMESTAMP(),${creation_raw},minute) > 5
-        AND TIMESTAMP_DIFF(CURRENT_TIMESTAMP(),${creation_raw},minute) <= 10
-        THEN 'Previous 5 Min'
+        WHEN TIMESTAMP_DIFF(CURRENT_TIMESTAMP(),${creation_raw},hour) <= 3
+        THEN 'Last 3 Hours'
+        WHEN TIMESTAMP_DIFF(CURRENT_TIMESTAMP(),${creation_raw},hour) > 3
+        AND TIMESTAMP_DIFF(CURRENT_TIMESTAMP(),${creation_raw},hour) <= 6
+        THEN 'Previous 3 Hours'
         ELSE NULL
         END
        ;;
-    label: "5 Minute Period"
+    label: "3 Hour Period"
     group_label: "Reporting Periods"
   }
 
-  dimension: 15_min_reporting_periods {
+  dimension: 6_hour_reporting_periods {
     sql: CASE
-        WHEN TIMESTAMP_DIFF(CURRENT_TIMESTAMP(),${creation_raw},minute) <= 15
-        THEN 'Last 15 Min'
-        WHEN TIMESTAMP_DIFF(CURRENT_TIMESTAMP(),${creation_raw},minute) > 15
-        AND TIMESTAMP_DIFF(CURRENT_TIMESTAMP(),${creation_raw},minute) <= 30
-        THEN 'Previous 15 Min'
+        WHEN TIMESTAMP_DIFF(CURRENT_TIMESTAMP(),${creation_raw},hour) <= 6
+        THEN 'Last 6 Hours'
+        WHEN TIMESTAMP_DIFF(CURRENT_TIMESTAMP(),${creation_raw},hour) > 6
+        AND TIMESTAMP_DIFF(CURRENT_TIMESTAMP(),${creation_raw},hour) <= 12
+        THEN 'Previous 6 Hours'
         ELSE NULL
         END
        ;;
-      label: "15 Minute Period"
+      label: "6 Hour Period"
       group_label: "Reporting Periods"
   }
 
-  dimension: 30_min_reporting_periods {
-    sql: CASE
-        WHEN TIMESTAMP_DIFF(CURRENT_TIMESTAMP(),${creation_raw},minute) <= 30
-        THEN 'Last 30 Min'
-        WHEN TIMESTAMP_DIFF(CURRENT_TIMESTAMP(),${creation_raw},minute) > 30
-        AND TIMESTAMP_DIFF(CURRENT_TIMESTAMP(),${creation_raw},minute) <= 60
-        THEN 'Previous 30 Min'
-        ELSE NULL
-        END
-       ;;
-    label: "30 Minute Period"
-    group_label: "Reporting Periods"
-  }
 
   dimension: one_hour_reporting_periods {
     sql: CASE
@@ -91,31 +78,27 @@ view: jobs_by_organization_raw {
 
   type: unquoted
   allowed_value: {
-    label: "5 Minute Reporting Period"
-    value: "5"
-  }
-  allowed_value: {
-    label: "15 Minute Reporting Period"
-    value: "15"
-  }
-  allowed_value: {
-    label: "30 Minute Reporting Period"
-    value: "30"
-  }
-  allowed_value: {
     label: "One Hour Reporting Period"
-    value: "one"
+    value: "1"
+  }
+  allowed_value: {
+    label: "3 Hour Reporting Period"
+    value: "3"
+  }
+  allowed_value: {
+    label: "6 Hour Reporting Period"
+    value: "6"
   }
 }
 
 dimension: reporting_period {
   sql:
-    {% if reporting_period_parameter._parameter_value == '5' %}
-      ${5_min_reporting_periods}
-    {% elsif reporting_period_parameter._parameter_value == '15' %}
-      ${15_min_reporting_periods}
-    {% elsif reporting_period_parameter._parameter_value == '30' %}
-      ${30_min_reporting_periods}
+    {% if reporting_period_parameter._parameter_value == '1' %}
+      ${one_hour_reporting_periods}
+    {% elsif reporting_period_parameter._parameter_value == '3' %}
+      ${3_hour_reporting_periods}
+    {% elsif reporting_period_parameter._parameter_value == '6' %}
+      ${6_hour_reporting_periods}
     {% else %}
       ${one_hour_reporting_periods}
     {% endif %};;

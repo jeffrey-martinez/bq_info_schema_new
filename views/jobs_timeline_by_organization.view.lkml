@@ -26,6 +26,7 @@ view: jobs_timeline_by_organization {
       month,
       time_of_day,
       day_of_week,
+      day_of_week_index,
       hour_of_day
     ]
     sql: ${TABLE}.period_start ;;
@@ -73,6 +74,20 @@ view: jobs_timeline_by_organization {
     drill_fields: [detail*]
     label: "Slots Used by Hour"
   }
+
+  measure: count_hours {
+    type: count_distinct
+    sql: concat(${period_start_date},'-',${period_start_hour_of_day},'-',${period_start_day_of_week}) ;;
+  }
+
+  measure: total_slots_per_hour {
+    type: number
+    sql: ${total_slot_ms} / (60000 * 60) /${count_hours} ;;
+    value_format_name: decimal_2
+    drill_fields: [detail*]
+    label: "Slots Used by Hour of Day"
+  }
+### Divide by count distinct date concat hour ###
 
 #   parameter: slot_usage_reporting_period{
 #
@@ -122,6 +137,82 @@ view: jobs_timeline_by_organization {
     type: string
     sql: ${TABLE}.user_email ;;
   }
+
+  dimension: 3_hour_reporting_periods {
+    sql: CASE
+        WHEN TIMESTAMP_DIFF(CURRENT_TIMESTAMP(),${job_creation_time_raw},hour) <= 3
+        THEN 'Last 3 Hours'
+        WHEN TIMESTAMP_DIFF(CURRENT_TIMESTAMP(),${job_creation_time_raw},hour) > 3
+        AND TIMESTAMP_DIFF(CURRENT_TIMESTAMP(),${job_creation_time_raw},hour) <= 6
+        THEN 'Previous 3 Hours'
+        ELSE NULL
+        END
+       ;;
+    label: "3 Hour Period"
+    group_label: "Reporting Periods"
+  }
+
+  dimension: 6_hour_reporting_periods {
+    sql: CASE
+        WHEN TIMESTAMP_DIFF(CURRENT_TIMESTAMP(),${job_creation_time_raw},hour) <= 6
+        THEN 'Last 6 Hours'
+        WHEN TIMESTAMP_DIFF(CURRENT_TIMESTAMP(),${job_creation_time_raw},hour) > 6
+        AND TIMESTAMP_DIFF(CURRENT_TIMESTAMP(),${job_creation_time_raw},hour) <= 12
+        THEN 'Previous 6 Hours'
+        ELSE NULL
+        END
+       ;;
+    label: "6 Hour Period"
+    group_label: "Reporting Periods"
+  }
+
+
+  dimension: one_hour_reporting_periods {
+    sql: CASE
+        WHEN TIMESTAMP_DIFF(CURRENT_TIMESTAMP(),${job_creation_time_raw},minute) <= 60
+        THEN 'Last Hour'
+        WHEN TIMESTAMP_DIFF(CURRENT_TIMESTAMP(),${job_creation_time_raw},minute) > 60
+        AND TIMESTAMP_DIFF(CURRENT_TIMESTAMP(),${job_creation_time_raw},minute) <= 120
+        THEN 'Previous Hour'
+        ELSE NULL
+        END
+       ;;
+    label: "One Hour Period"
+    group_label: "Reporting Periods"
+  }
+
+  parameter: reporting_period_parameter {
+
+    type: unquoted
+    allowed_value: {
+      label: "One Hour Reporting Period"
+      value: "1"
+    }
+    allowed_value: {
+      label: "3 Hour Reporting Period"
+      value: "3"
+    }
+    allowed_value: {
+      label: "6 Hour Reporting Period"
+      value: "6"
+    }
+  }
+
+  dimension: reporting_period {
+    sql:
+    {% if reporting_period_parameter._parameter_value == '1' %}
+      ${one_hour_reporting_periods}
+    {% elsif reporting_period_parameter._parameter_value == '3' %}
+      ${3_hour_reporting_periods}
+    {% elsif reporting_period_parameter._parameter_value == '6' %}
+      ${6_hour_reporting_periods}
+    {% else %}
+      ${one_hour_reporting_periods}
+    {% endif %};;
+    label: "Dynamic Reporting Period"
+    group_label: "Reporting Periods"
+  }
+
 
   dimension: job_id {
     type: string
