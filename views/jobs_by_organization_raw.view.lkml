@@ -650,6 +650,13 @@ view: jobs_by_organization_raw__job_stages {
     sql: ${shuffle_output_bytes_spilled} ;;
   }
 
+  measure: total_shuffle_output_gibibytes_spilled {
+    type: sum
+    label: "GB Shuffled"
+    sql: ${shuffle_output_bytes_spilled} / (1024*1024*1024) ;;
+    value_format_name: decimal_2
+  }
+
   dimension: records_read {
     type: number
     sql: ${TABLE}.records_read ;;
