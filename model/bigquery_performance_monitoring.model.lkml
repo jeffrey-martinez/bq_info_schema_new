@@ -103,4 +103,12 @@ explore: jobs_by_organization_raw_all_queries {
   }
 }
 
-explore: jobs_timeline_by_organization {}
+explore: jobs_timeline_by_organization {
+  join: count_interval {
+    type: full_outer
+    fields: []
+    relationship: many_to_one
+    sql_on: ${jobs_timeline_by_organization.period_start_hour_of_day} = ${count_interval.hour}
+and ${jobs_timeline_by_organization.period_start_day_of_week_index} = ${count_interval.dayofweek} ;;
+  }
+}

@@ -87,6 +87,11 @@ view: jobs_timeline_by_organization {
     drill_fields: [detail*]
     label: "Slots Used by Hour of Day"
   }
+
+  measure: slots_per_30_days_hour {
+    type: number
+    sql: (${total_slot_ms} / (60000 * 60) / ${count_interval.max_total_hours}) ;;
+  }
 ### Divide by count distinct date concat hour ###
 
 #   parameter: slot_usage_reporting_period{
