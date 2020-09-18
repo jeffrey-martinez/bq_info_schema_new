@@ -14,7 +14,7 @@ view: commit_facts {
         SUM(annual_change) OVER(order by m.timestamp rows between unbounded preceding and current row) as annual_slot_count,
         SUM(monthly_change) OVER(order by m.timestamp rows between unbounded preceding and current row) as monthly_slot_count,
         SUM(flex_change) OVER(order by m.timestamp rows between unbounded preceding and current row) as flex_slot_count
-      FROM minutes m LEFT JOIN t
+      FROM minutes m FULL OUTER JOIN t
       on m.timestamp  = t.change_timestamp
       -- and capacity_commitment_id is not null
       order by timestamp desc
