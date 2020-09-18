@@ -285,6 +285,18 @@ view: jobs_timeline_by_organization {
     sql: ${TABLE}.total_bytes_billed ;;
   }
 
+  measure: concurrency {
+    type: count_distinct
+    sql: ${job_id} ;;
+    filters: [state: "RUNNING"]
+  }
+
+  measure: pending_queries {
+    type: count_distinct
+    sql: ${job_id} ;;
+    filters: [state: "PENDING"]
+  }
+
   set: detail {
     fields: [
       period_start_time,
