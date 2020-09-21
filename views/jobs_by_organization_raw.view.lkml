@@ -5,11 +5,15 @@ view: jobs_by_organization_raw {
  ;;
   }
 
+##### This is the main Information Schema table - with one row per job executed #####################
+
   measure: count_of_jobs {
     type: count
     drill_fields: [detail*]
   }
 
+
+#### This is the partition field for the Jobs table #####
   dimension_group: creation {
     type: time
     timeframes: [
@@ -30,6 +34,8 @@ view: jobs_by_organization_raw {
     ]
     sql: ${TABLE}.creation_time ;;
   }
+
+  ###### Creating Dynamic Reporting Periods for the Dashboard ########
 
   dimension: 3_hour_reporting_periods {
     sql: CASE
@@ -117,6 +123,8 @@ dimension: reporting_period {
     sql: ${TABLE}.project_number ;;
   }
 
+##### Linking to the User Lookup Dashboard ######
+
   dimension: user_email {
     type: string
     sql: ${TABLE}.user_email ;;
@@ -126,6 +134,8 @@ dimension: reporting_period {
       icon_url: "http://www.looker.com/favicon.ico"
     }
   }
+
+  #### Linking to Job Lookup Dashboard and GCP Console ######
 
   dimension: job_id {
     primary_key: yes
@@ -189,6 +199,8 @@ dimension: reporting_period {
     sql: ${TABLE}.end_time ;;
   }
 
+
+#### Query Duration #####
   dimension: duration_milliseconds {
     type: number
     sql: TIMESTAMP_DIFF(${end_time_raw}, ${start_time_raw}, MILLISECOND) ;;
@@ -204,6 +216,8 @@ dimension: reporting_period {
     value_format_name: decimal_2
     sql: ${duration_seconds} ;;
   }
+
+##### The Query Text field was removed from the Jobs by Organization Table #####
 
   # dimension: query {
   #   type: string
@@ -298,7 +312,7 @@ dimension: reporting_period {
 #   }
 
   dimension: query_total_slot {
-    label: "Average Slots Used for a Query"
+    label: "Total Slots Used for a Query"
     type: number
     sql: ${total_slot_ms}/NULLIF(${duration_milliseconds},0) ;;
     drill_fields: [job_id,total_gb_processed]
@@ -322,6 +336,7 @@ dimension: reporting_period {
   dimension: gb_processed {
     type: number
 ############# 10MB is the minimum billing amount for On-Demand pricing ##################
+############# BQ uses Gibibytes (1024*1024*1024) instead of Gigabytes for processing ##############
     sql: IF(${total_bytes_processed} < 10.0 * (1024*1024),
       (10.0 * 1024 * 1024) * ARRAY_LENGTH(${referenced_tables}) / (1024*1024*1024),
       ${total_bytes_processed} / (1024*1024*1024))  ;;
@@ -360,6 +375,8 @@ dimension: reporting_period {
     value_format_name: decimal_2
     sql: ${total_estimated_bytes_billed} / POW(2, 40) ;;
   }
+
+##### Model Creation costs more per GB than other Statement Types #######
 
   measure: estimated_on_demand_cost {
     label: "Estimated On-Demand Cost"
@@ -450,6 +467,9 @@ dimension: reporting_period {
     ]
   }
 }
+
+
+##### NDT to filter by top N Projects #####
 
 view: project_gb_rank_ndt {
   derived_table: {
@@ -652,7 +672,7 @@ view: jobs_by_organization_raw__job_stages {
 
   measure: total_shuffle_output_gibibytes_spilled {
     type: sum
-    label: "GB Shuffled"
+    label: "Shuffle GB Spilled"
     sql: ${shuffle_output_bytes_spilled} / (1024*1024*1024) ;;
     value_format_name: decimal_2
   }
@@ -796,6 +816,8 @@ view: jobs_by_organization_raw__job_stages__steps__substeps  {
     sql: ${TABLE} ;;
   }
 }
+
+##### NDT to filter Top N Referenced Datasets ######
 
 view: referenced_datasets_ndt {
   derived_table: {

@@ -1,4 +1,4 @@
-- dashboard: bigquery_performance_monitoring_by_organization
+- dashboard: performance_monitoring_by_organization
   title: BigQuery Performance Monitoring by Organization
   layout: newspaper
   preferred_viewer: dashboards
@@ -9,7 +9,7 @@
     explore: jobs_timeline_by_organization
     type: looker_line
     fields: [jobs_timeline_by_organization.period_start_hour_of_day, jobs_timeline_by_organization.period_start_day_of_week,
-      jobs_timeline_by_organization.total_slots_per_hour]
+      jobs_timeline_by_organization.slots_per_30_days_hour]
     pivots: [jobs_timeline_by_organization.period_start_day_of_week]
     fill_fields: [jobs_timeline_by_organization.period_start_day_of_week, jobs_timeline_by_organization.period_start_hour_of_day]
     filters:
@@ -88,18 +88,16 @@
     defaults_version: 1
     hidden_fields: []
     listen: {}
-    row: 36
+    row: 29
     col: 0
     width: 24
     height: 6
-  - title: New Tile
-    name: New Tile
+  - title: GB Spilled
+    name: GB Spilled
     model: bigquery_performance_monitoring
     explore: jobs_by_organization_raw
     type: single_value
-    fields: [jobs_by_organization_raw__job_stages.total_shuffle_output_bytes_spilled]
-    sorts: [jobs_by_organization_raw__job_stages.total_shuffle_output_bytes_spilled
-        desc]
+    fields: [jobs_by_organization_raw__job_stages.total_shuffle_output_gibibytes_spilled]
     limit: 500
     column_limit: 50
     custom_color_enabled: true
@@ -111,7 +109,7 @@
     enable_conditional_formatting: false
     conditional_formatting_include_totals: false
     conditional_formatting_include_nulls: false
-    single_value_title: Bytes Spilled This Period
+    single_value_title: Shuffle GB Spilled to Disk
     comparison_label: vs Previous Period
     x_axis_gridlines: false
     y_axis_gridlines: true
@@ -140,10 +138,10 @@
     defaults_version: 1
     series_types: {}
     listen:
-      Slot Usage and Pending Units Time Window: jobs_by_organization_raw.creation_date
-    row: 3
-    col: 12
-    width: 6
+      Reporting Period: jobs_by_organization_raw.creation_date
+    row: 2
+    col: 16
+    width: 8
     height: 4
   - title: GB Processed
     name: GB Processed
@@ -196,73 +194,16 @@
     defaults_version: 1
     series_types: {}
     listen:
-      Slot Usage and Pending Units Time Window: jobs_by_organization_raw.creation_date
-    row: 3
+      Reporting Period: jobs_by_organization_raw.creation_date
+    row: 2
     col: 0
-    width: 6
-    height: 4
-  - title: New Tile
-    name: New Tile (2)
-    model: bigquery_performance_monitoring
-    explore: jobs_by_organization_raw
-    type: single_value
-    fields: [jobs_by_organization_snapshot__snapshot.total_pending_units]
-    sorts: [jobs_by_organization_snapshot__snapshot.total_pending_units desc]
-    limit: 500
-    column_limit: 50
-    query_timezone: America/Los_Angeles
-    custom_color_enabled: true
-    show_single_value_title: true
-    show_comparison: false
-    comparison_type: value
-    comparison_reverse_colors: false
-    show_comparison_label: true
-    enable_conditional_formatting: true
-    conditional_formatting_include_totals: false
-    conditional_formatting_include_nulls: false
-    single_value_title: Pending Units This Period
-    comparison_label: vs Previous Period
-    conditional_formatting: [{type: equal to, value: !!null '', background_color: "#3EB0D5",
-        font_color: !!null '', color_application: {collection_id: b43731d5-dc87-4a8e-b807-635bef3948e7,
-          palette_id: 85de97da-2ded-4dec-9dbd-e6a7d36d5825}, bold: false, italic: false,
-        strikethrough: false, fields: !!null ''}]
-    x_axis_gridlines: false
-    y_axis_gridlines: true
-    show_view_names: false
-    show_y_axis_labels: true
-    show_y_axis_ticks: true
-    y_axis_tick_density: default
-    y_axis_tick_density_custom: 5
-    show_x_axis_label: true
-    show_x_axis_ticks: true
-    y_axis_scale_mode: linear
-    x_axis_reversed: false
-    y_axis_reversed: false
-    plot_size_by_field: false
-    trellis: ''
-    stacking: ''
-    limit_displayed_rows: false
-    legend_position: center
-    point_style: none
-    show_value_labels: false
-    label_density: 25
-    x_axis_scale: auto
-    y_axis_combined: true
-    show_null_points: true
-    interpolation: linear
-    defaults_version: 1
-    series_types: {}
-    listen:
-      Slot Usage and Pending Units Time Window: jobs_by_organization_raw.creation_date
-    row: 3
-    col: 18
-    width: 6
+    width: 8
     height: 4
   - title: Pending Units by Minute
     name: Pending Units by Minute
     model: bigquery_performance_monitoring
     explore: jobs_by_organization_raw
-    type: looker_line
+    type: looker_area
     fields: [jobs_by_organization_snapshot__snapshot.total_pending_units, jobs_by_organization_raw.creation_minute5,
       jobs_by_organization_raw.project_id]
     pivots: [jobs_by_organization_raw.project_id]
@@ -284,7 +225,7 @@
     y_axis_reversed: false
     plot_size_by_field: false
     trellis: ''
-    stacking: ''
+    stacking: normal
     limit_displayed_rows: false
     legend_position: center
     point_style: none
@@ -294,6 +235,9 @@
     y_axis_combined: true
     show_null_points: true
     interpolation: linear
+    show_totals_labels: false
+    show_silhouette: false
+    totals_color: "#808080"
     color_application:
       collection_id: 1bc1f1d8-7461-4bfd-8c3b-424b924287b5
       palette_id: dd87bc4e-d86f-47b1-b0fd-44110dc0b469
@@ -304,6 +248,7 @@
               Pending Units}], showLabels: true, showValues: true, maxValue: !!null '',
         unpinAxis: false, tickDensity: default, tickDensityCustom: 5, type: linear}]
     x_axis_label: Minute
+    series_types: {}
     series_colors:
       jobs_by_organization_raw.average_slots_used: "#2693D1"
       jobs_by_organization_snapshot__snapshot.total_pending_units: "#72C5D4"
@@ -311,8 +256,8 @@
     reference_lines: []
     defaults_version: 1
     listen:
-      Slot Usage and Pending Units Time Window: jobs_by_organization_raw.creation_date
-    row: 13
+      Reporting Period: jobs_by_organization_raw.creation_date
+    row: 12
     col: 0
     width: 24
     height: 5
@@ -357,20 +302,23 @@
     series_column_widths: {}
     series_cell_visualizations:
       jobs_by_organization_raw.total_gb_processed:
-        is_active: true
+        is_active: false
         palette:
           palette_id: 46a4b248-19f7-4e71-9cf0-59fcc2c3039e
           collection_id: 1bc1f1d8-7461-4bfd-8c3b-424b924287b5
+        value_display: false
       jobs_by_organization_raw.average_slot_utilization:
         is_active: true
         palette:
           palette_id: 471a8295-662d-46fc-bd2d-2d0acd370c1e
           collection_id: b43731d5-dc87-4a8e-b807-635bef3948e7
       jobs_by_organization_raw.count_of_jobs:
-        is_active: true
+        is_active: false
         palette:
           palette_id: 46a4b248-19f7-4e71-9cf0-59fcc2c3039e
           collection_id: 1bc1f1d8-7461-4bfd-8c3b-424b924287b5
+      jobs_by_organization_raw.average_duration_seconds:
+        is_active: true
     conditional_formatting: []
     series_value_format:
       jobs_by_organization_raw.total_gb_processed:
@@ -385,127 +333,9 @@
     defaults_version: 1
     series_types: {}
     listen: {}
-    row: 30
+    row: 23
     col: 13
     width: 11
-    height: 6
-  - title: GB Processed by Referenced Data Set
-    name: GB Processed by Referenced Data Set
-    model: bigquery_performance_monitoring
-    explore: jobs_by_organization_raw
-    type: looker_bar
-    fields: [jobs_by_organization_raw__referenced_tables.referenced_project_id, jobs_by_organization_raw__referenced_tables.referenced_dataset_id,
-      jobs_by_organization_raw.total_gb_processed]
-    pivots: [jobs_by_organization_raw__referenced_tables.referenced_dataset_id]
-    filters:
-      jobs_by_organization_raw__referenced_tables.referenced_project_id: "-EMPTY,-NULL"
-    sorts: [jobs_by_organization_raw__referenced_tables.referenced_dataset_id, jobs_by_organization_raw.total_gb_processed
-        desc 0]
-    limit: 500
-    column_limit: 50
-    x_axis_gridlines: false
-    y_axis_gridlines: false
-    show_view_names: false
-    show_y_axis_labels: true
-    show_y_axis_ticks: true
-    y_axis_tick_density: default
-    y_axis_tick_density_custom: 5
-    show_x_axis_label: true
-    show_x_axis_ticks: true
-    y_axis_scale_mode: linear
-    x_axis_reversed: false
-    y_axis_reversed: false
-    plot_size_by_field: false
-    trellis: ''
-    stacking: percent
-    limit_displayed_rows: false
-    legend_position: center
-    point_style: none
-    show_value_labels: false
-    label_density: 25
-    x_axis_scale: auto
-    y_axis_combined: true
-    ordering: none
-    show_null_labels: false
-    show_totals_labels: false
-    show_silhouette: false
-    totals_color: "#808080"
-    color_application:
-      collection_id: 1bc1f1d8-7461-4bfd-8c3b-424b924287b5
-      palette_id: dd87bc4e-d86f-47b1-b0fd-44110dc0b469
-      options:
-        steps: 5
-    y_axes: [{label: Slots Used, orientation: bottom, series: [{axisId: brand_sentiment
-              - jobs_by_organization_raw.average_slots_used, id: brand_sentiment -
-              jobs_by_organization_raw.average_slots_used, name: brand_sentiment},
-          {axisId: call_center - jobs_by_organization_raw.average_slots_used, id: call_center
-              - jobs_by_organization_raw.average_slots_used, name: call_center}, {
-            axisId: census_bureau_acs - jobs_by_organization_raw.average_slots_used,
-            id: census_bureau_acs - jobs_by_organization_raw.average_slots_used, name: census_bureau_acs},
-          {axisId: census_utility - jobs_by_organization_raw.average_slots_used, id: census_utility
-              - jobs_by_organization_raw.average_slots_used, name: census_utility},
-          {axisId: covid19_block - jobs_by_organization_raw.average_slots_used, id: covid19_block
-              - jobs_by_organization_raw.average_slots_used, name: covid19_block},
-          {axisId: covid19_google_mobility - jobs_by_organization_raw.average_slots_used,
-            id: covid19_google_mobility - jobs_by_organization_raw.average_slots_used,
-            name: covid19_google_mobility}, {axisId: covid19_italy - jobs_by_organization_raw.average_slots_used,
-            id: covid19_italy - jobs_by_organization_raw.average_slots_used, name: covid19_italy},
-          {axisId: covid19_jhu_csse - jobs_by_organization_raw.average_slots_used,
-            id: covid19_jhu_csse - jobs_by_organization_raw.average_slots_used, name: covid19_jhu_csse},
-          {axisId: covid19_nyt - jobs_by_organization_raw.average_slots_used, id: covid19_nyt
-              - jobs_by_organization_raw.average_slots_used, name: covid19_nyt}, {
-            axisId: customer_usage - jobs_by_organization_raw.average_slots_used,
-            id: customer_usage - jobs_by_organization_raw.average_slots_used, name: customer_usage},
-          {axisId: demo_management - jobs_by_organization_raw.average_slots_used,
-            id: demo_management - jobs_by_organization_raw.average_slots_used, name: demo_management},
-          {axisId: demo_scratch - jobs_by_organization_raw.average_slots_used, id: demo_scratch
-              - jobs_by_organization_raw.average_slots_used, name: demo_scratch},
-          {axisId: demoexpo_scratch - jobs_by_organization_raw.average_slots_used,
-            id: demoexpo_scratch - jobs_by_organization_raw.average_slots_used, name: demoexpo_scratch},
-          {axisId: ecomm - jobs_by_organization_raw.average_slots_used, id: ecomm
-              - jobs_by_organization_raw.average_slots_used, name: ecomm}, {axisId: fdic_banks
-              - jobs_by_organization_raw.average_slots_used, id: fdic_banks - jobs_by_organization_raw.average_slots_used,
-            name: fdic_banks}, {axisId: finserv_staging - jobs_by_organization_raw.average_slots_used,
-            id: finserv_staging - jobs_by_organization_raw.average_slots_used, name: finserv_staging},
-          {axisId: geo_us_boundaries - jobs_by_organization_raw.average_slots_used,
-            id: geo_us_boundaries - jobs_by_organization_raw.average_slots_used, name: geo_us_boundaries},
-          {axisId: ghcn_d - jobs_by_organization_raw.average_slots_used, id: ghcn_d
-              - jobs_by_organization_raw.average_slots_used, name: ghcn_d}, {axisId: INFORMATION_SCHEMA
-              - jobs_by_organization_raw.average_slots_used, id: INFORMATION_SCHEMA
-              - jobs_by_organization_raw.average_slots_used, name: INFORMATION_SCHEMA},
-          {axisId: jira - jobs_by_organization_raw.average_slots_used, id: jira -
-              jobs_by_organization_raw.average_slots_used, name: jira}, {axisId: jira_staging
-              - jobs_by_organization_raw.average_slots_used, id: jira_staging - jobs_by_organization_raw.average_slots_used,
-            name: jira_staging}, {axisId: let - jobs_by_organization_raw.average_slots_used,
-            id: let - jobs_by_organization_raw.average_slots_used, name: let}, {axisId: looker_scratch
-              - jobs_by_organization_raw.average_slots_used, id: looker_scratch -
-              jobs_by_organization_raw.average_slots_used, name: looker_scratch},
-          {axisId: netsuite_accounting - jobs_by_organization_raw.average_slots_used,
-            id: netsuite_accounting - jobs_by_organization_raw.average_slots_used,
-            name: netsuite_accounting}, {axisId: NEXT2020 - jobs_by_organization_raw.average_slots_used,
-            id: NEXT2020 - jobs_by_organization_raw.average_slots_used, name: NEXT2020},
-          {axisId: region-us - jobs_by_organization_raw.average_slots_used, id: region-us
-              - jobs_by_organization_raw.average_slots_used, name: region-us}, {axisId: retail
-              - jobs_by_organization_raw.average_slots_used, id: retail - jobs_by_organization_raw.average_slots_used,
-            name: retail}, {axisId: retail_banking - jobs_by_organization_raw.average_slots_used,
-            id: retail_banking - jobs_by_organization_raw.average_slots_used, name: retail_banking},
-          {axisId: salesforce - jobs_by_organization_raw.average_slots_used, id: salesforce
-              - jobs_by_organization_raw.average_slots_used, name: salesforce}, {
-            axisId: thelook - jobs_by_organization_raw.average_slots_used, id: thelook
-              - jobs_by_organization_raw.average_slots_used, name: thelook}, {axisId: utility_us
-              - jobs_by_organization_raw.average_slots_used, id: utility_us - jobs_by_organization_raw.average_slots_used,
-            name: utility_us}, {axisId: zendesk - jobs_by_organization_raw.average_slots_used,
-            id: zendesk - jobs_by_organization_raw.average_slots_used, name: zendesk}],
-        showLabels: true, showValues: true, unpinAxis: false, tickDensity: default,
-        tickDensityCustom: 5, type: linear}]
-    x_axis_label: Project
-    hide_legend: true
-    series_types: {}
-    defaults_version: 1
-    listen: {}
-    row: 30
-    col: 0
-    width: 13
     height: 6
   - title: GB Processed by Hour of Day and Day of Week
     name: GB Processed by Hour of Day and Day of Week
@@ -590,7 +420,7 @@
         strikethrough: false, fields: []}]
     defaults_version: 1
     listen: {}
-    row: 42
+    row: 35
     col: 0
     width: 24
     height: 6
@@ -601,7 +431,7 @@
     type: looker_grid
     fields: [jobs_by_organization_raw.job_id, jobs_by_organization_raw.user_email,
       jobs_by_organization_raw.query_total_slot, jobs_by_organization_raw.duration_seconds,
-      jobs_by_organization_raw.total_gb_processed, jobs_by_organization_raw.sum_shuffle_output_megabytes_spilled]
+      jobs_by_organization_raw.total_gb_processed]
     filters:
       jobs_by_organization_raw.creation_date: 30 days
     sorts: [jobs_by_organization_raw.total_gb_processed desc]
@@ -637,10 +467,11 @@
     series_column_widths: {}
     series_cell_visualizations:
       jobs_by_organization_raw.total_gb_processed:
-        is_active: true
+        is_active: false
         palette:
           palette_id: 46a4b248-19f7-4e71-9cf0-59fcc2c3039e
           collection_id: 1bc1f1d8-7461-4bfd-8c3b-424b924287b5
+        value_display: false
       jobs_by_organization_raw.average_slot_utilization:
         is_active: false
         palette:
@@ -689,12 +520,12 @@
     series_types: {}
     hidden_fields:
     listen: {}
-    row: 24
+    row: 23
     col: 0
-    width: 24
+    width: 13
     height: 6
   - title: New Tile
-    name: New Tile (3)
+    name: New Tile
     model: bigquery_performance_monitoring
     explore: jobs_by_organization_raw
     type: single_value
@@ -744,10 +575,10 @@
     defaults_version: 1
     series_types: {}
     listen:
-      Slot Usage and Pending Units Time Window: jobs_by_organization_raw.creation_date
-    row: 3
-    col: 6
-    width: 6
+      Reporting Period: jobs_by_organization_raw.creation_date
+    row: 2
+    col: 8
+    width: 8
     height: 4
   - title: Capacity Commitments
     name: Capacity Commitments
@@ -798,21 +629,20 @@
     show_null_points: true
     interpolation: linear
     listen:
-      Slot Usage and Pending Units Time Window: commit_facts.timestamp_date
-    row: 18
+      Reporting Period: commit_facts.timestamp_date
+    row: 17
     col: 0
     width: 24
     height: 6
   - name: BigQuery Monitoring
     type: text
     title_text: BigQuery Monitoring
-    subtitle_text: Specify Project Using Source Project Filter
-    body_text: Use the reporting period selector to change the period for the top
-      4 high-level KPIs.
+    subtitle_text: How much is being consumed?
+    body_text: ''
     row: 0
     col: 0
     width: 24
-    height: 3
+    height: 2
   - title: Slots Used by Minute
     name: Slots Used by Minute
     model: bigquery_performance_monitoring
@@ -856,14 +686,14 @@
     series_types: {}
     defaults_version: 1
     listen:
-      Slot Usage and Pending Units Time Window: jobs_timeline_by_organization.job_creation_time_date
-    row: 7
+      Reporting Period: jobs_timeline_by_organization.job_creation_time_date
+    row: 6
     col: 0
     width: 24
     height: 6
   filters:
-  - name: Slot Usage and Pending Units Time Window
-    title: Slot Usage and Pending Units Time Window
+  - name: Reporting Period
+    title: Reporting Period
     type: date_filter
     default_value: 6 hours
     allow_multiple_values: true

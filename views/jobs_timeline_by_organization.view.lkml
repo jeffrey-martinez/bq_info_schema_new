@@ -5,6 +5,10 @@ view: jobs_timeline_by_organization {
        ;;
   }
 
+#### This is the table used for real-time analysis ######
+#### Instead of a row per query, it has a row for every time resource allocation changed over the duration of a query ####
+#### A slower table to query, but provides much more granular slot usaage information ####
+
   measure: count {
     type: count
     drill_fields: [detail*]
@@ -222,6 +226,16 @@ view: jobs_timeline_by_organization {
   dimension: job_id {
     type: string
     sql: ${TABLE}.job_id ;;
+    link: {
+      label: "Job Lookup Dashboard"
+      url: "/dashboards/4?Job%20Id={{ value }}&filter_config=%7B%22Job%20Id%22:%5B%7B%22type%22:%22%3D%22,%22values%22:%5B%7B%22constant%22:%22{{ value | encode_uri }}%22%7D,%7B%7D%5D,%22id%22:6%7D%5D%7D"
+      icon_url: "http://www.looker.com/favicon.ico"
+    }
+    link: {
+      label: "View Query History in BigQuery"
+      url: "https://console.cloud.google.com/bigquery?j=bq:US:{{ value }}&page=queryresults"
+      icon_url: "http://www.looker.com/favicon.ico"
+    }
   }
 
   dimension: job_type {
