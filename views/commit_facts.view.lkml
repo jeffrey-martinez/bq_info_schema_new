@@ -49,6 +49,7 @@ view: commit_facts {
   dimension_group: timestamp {
     type: time
     sql: ${TABLE}.timestamp ;;
+    allow_fill: no
     timeframes: [minute,minute10,minute5,hour,hour_of_day,date,day_of_week,week]
   }
 

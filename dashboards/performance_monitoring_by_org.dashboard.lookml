@@ -587,7 +587,6 @@
     type: looker_column
     fields: [commit_facts.annual_commit, commit_facts.flex_commit, commit_facts.monthly_commit,
       commit_facts.timestamp_minute5]
-    fill_fields: [commit_facts.timestamp_minute5]
     sorts: [commit_facts.timestamp_minute5 desc]
     limit: 500
     query_timezone: America/Los_Angeles

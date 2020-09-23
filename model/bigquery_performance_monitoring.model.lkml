@@ -112,3 +112,6 @@ explore: jobs_timeline_by_organization {
 and ${jobs_timeline_by_organization.period_start_day_of_week_index} = ${count_interval.dayofweek} ;;
   }
 }
+
+
+explore: concurrency_per_second {}
