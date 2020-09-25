@@ -8,6 +8,7 @@ view: concurrency_per_second {
       )
           SELECT
               s.timestamp,
+              r.project_id,
               SUM(IF(r.state = "PENDING", 1, 0)) as PENDING,
               SUM(IF(r.state = "RUNNING", 1, 0)) as RUNNING
           FROM
@@ -17,7 +18,7 @@ view: concurrency_per_second {
           WHERE
               s.timestamp BETWEEN TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 1 DAY) AND CURRENT_TIMESTAMP()
             --  and t.job_creation_time BETWEEN TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 1 DAY) AND CURRENT_TIMESTAMP()
-          GROUP BY s.timestamp
+          GROUP BY s.timestamp, r.project_id
        ;;
   }
 
@@ -34,6 +35,11 @@ view: concurrency_per_second {
     timeframes: [raw,minute5]
     allow_fill: no
     sql: ${TABLE}.timestamp ;;
+  }
+
+  dimension: project_id {
+    type: string
+    sql: ${TABLE}.project_id ;;
   }
 
   dimension: pending {
