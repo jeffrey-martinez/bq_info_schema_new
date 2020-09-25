@@ -1,14 +1,17 @@
 view: concurrency_per_second {
   derived_table: {
     sql: WITH seconds as (
-          SELECT TIMESTAMP_TRUNC(timestamp, SECOND) timestamp, FROM (SELECT GENERATE_TIMESTAMP_ARRAY(TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 1 DAY), CURRENT_TIMESTAMP(), INTERVAL 1 SECOND) timestamps), UNNEST(timestamps) timestamp
+          SELECT TIMESTAMP_TRUNC(timestamp, SECOND) timestamp, FROM (SELECT GENERATE_TIMESTAMP_ARRAY(TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 2 DAY), CURRENT_TIMESTAMP(), INTERVAL 1 SECOND) timestamps), UNNEST(timestamps) timestamp
+      ), filtered_jobs_timeline as (
+      SELECT * from `region-us.INFORMATION_SCHEMA`.JOBS_TIMELINE_BY_ORGANIZATION f
+      WHERE f.job_creation_time BETWEEN TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 1 DAY) AND CURRENT_TIMESTAMP()
       )
           SELECT
               s.timestamp,
               SUM(IF(r.state = "PENDING", 1, 0)) as PENDING,
               SUM(IF(r.state = "RUNNING", 1, 0)) as RUNNING
           FROM
-              `region-us.INFORMATION_SCHEMA`.JOBS_TIMELINE_BY_PROJECT r
+              filtered_jobs_timeline r
               FULL OUTER JOIN seconds s
               ON s.timestamp  = r.period_start
           WHERE
@@ -18,6 +21,9 @@ view: concurrency_per_second {
        ;;
   }
 
+
+  ######Add Parameter - Filter Date - Use that parameter - 6 to filter creation_time #######
+
   measure: count {
     type: count
     drill_fields: [detail*]
@@ -26,6 +32,7 @@ view: concurrency_per_second {
   dimension_group: timestamp {
     type: time
     timeframes: [raw,minute5]
+    allow_fill: no
     sql: ${TABLE}.timestamp ;;
   }
 
