@@ -1,9 +1,7 @@
 view: jobs_timeline_by_organization {
-  derived_table: {
-    sql: SELECT * FROM
-      `region-us.INFORMATION_SCHEMA.JOBS_TIMELINE_BY_ORGANIZATION`
+    sql_table_name: `region-us.INFORMATION_SCHEMA.JOBS_TIMELINE_BY_ORGANIZATION`
        ;;
-  }
+
 
 #### This is the table used for real-time analysis ######
 #### Instead of a row per query, it has a row for every time resource allocation changed over the duration of a query ####

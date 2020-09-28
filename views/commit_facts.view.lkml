@@ -34,6 +34,12 @@ view: commit_facts {
     drill_fields: [detail*]
   }
 
+  dimension: pk {
+    hidden: yes
+    primary_key: yes
+    sql: ${TABLE}.timestamp ;;
+  }
+
   measure: monthly_commit {
     type: average
     sql: ${monthly_slot_count} ;;
