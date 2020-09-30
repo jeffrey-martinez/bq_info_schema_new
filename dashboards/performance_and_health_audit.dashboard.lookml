@@ -162,6 +162,7 @@
     conditional_formatting_include_totals: false
     conditional_formatting_include_nulls: false
     single_value_title: GB Processed This Period
+    value_format: 0.00,,"M"
     comparison_label: vs Previous
     conditional_formatting: [{type: equal to, value: !!null '', background_color: "#3EB0D5",
         font_color: !!null '', color_application: {collection_id: b43731d5-dc87-4a8e-b807-635bef3948e7,
