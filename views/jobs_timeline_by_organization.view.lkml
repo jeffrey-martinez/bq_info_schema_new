@@ -309,6 +309,38 @@ view: jobs_timeline_by_organization {
     filters: [state: "PENDING"]
   }
 
+  dimension: gb_processed {
+    type: number
+    sql: ${total_bytes_processed} / (1024*1024*1024)  ;;
+    value_format_name: decimal_2
+  }
+
+
+  measure: total_gb_processed {
+    label: "Total GiB Processed"
+    type: sum
+    value_format_name: decimal_2
+    sql: ${gb_processed} ;;
+    drill_fields: [detail*]
+  }
+
+  measure: average_gb_processed {
+    label: "Average GiB Processed"
+    type: average
+    value_format_name: decimal_2
+    sql: ${gb_processed} ;;
+    drill_fields: [detail*]
+  }
+
+  measure: gb_processed_30_day {
+    type: number
+    sql: (${total_gb_processed} / ${count_interval.max_total_hours}) ;;
+  }
+
+
+##### Model Creation costs more per GB than other Statement Types #######
+
+
   set: detail {
     fields: [
       period_start_time,
