@@ -80,6 +80,20 @@ view: jobs_by_organization_raw {
     group_label: "Reporting Periods"
   }
 
+  dimension: 30_day_reporting_periods {
+    sql: CASE
+        WHEN TIMESTAMP_DIFF(CURRENT_TIMESTAMP(),${creation_raw},DAY) <= 30
+        THEN 'Last 30 Days'
+        WHEN TIMESTAMP_DIFF(CURRENT_TIMESTAMP(),${creation_raw},DAY) > 30
+        AND TIMESTAMP_DIFF(CURRENT_TIMESTAMP(),${creation_raw},DAY) <= 60
+        THEN 'Previous 30 Days'
+        ELSE NULL
+        END
+       ;;
+    label: "30 Day Period"
+    group_label: "Reporting Periods"
+  }
+
  parameter: reporting_period_parameter {
 
   type: unquoted
