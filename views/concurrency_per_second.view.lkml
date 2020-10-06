@@ -63,19 +63,19 @@ view: concurrency_per_second {
 
   measure: max_pending {
     type: max
-    sql: ${pending} ;;
+    sql: nullif(${pending},0) ;;
   }
 
   measure: avg_running {
     label: "Average Concurrency"
     type: average
-    sql: ${running} ;;
+    sql: nullif(${running},0) ;;
   }
 
   measure: max_running {
     label: "Max Concurrency"
     type: max
-    sql: ${running} ;;
+    sql: nullif(${running},0) ;;
   }
 
   set: detail {
