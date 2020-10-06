@@ -12,6 +12,10 @@ view: jobs_timeline_by_organization {
     drill_fields: [detail*]
   }
 
+  filter: date_filter {
+    type: date_time
+  }
+
   dimension_group: period_start {
     type: time
     timeframes: [

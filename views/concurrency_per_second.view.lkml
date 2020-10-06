@@ -1,10 +1,10 @@
 view: concurrency_per_second {
   derived_table: {
     sql: WITH seconds as (
-          SELECT TIMESTAMP_TRUNC(timestamp, SECOND) timestamp, FROM (SELECT GENERATE_TIMESTAMP_ARRAY(TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 2 DAY), CURRENT_TIMESTAMP(), INTERVAL 1 SECOND) timestamps), UNNEST(timestamps) timestamp
+          SELECT TIMESTAMP_TRUNC(timestamp, SECOND) timestamp, FROM (SELECT GENERATE_TIMESTAMP_ARRAY(TIMESTAMP_SUB({% date_start jobs_timeline_by_organization.date_filter %}, INTERVAL 2 DAY), {% date_start jobs_timeline_by_organization.date_filter %}, INTERVAL 1 SECOND) timestamps), UNNEST(timestamps) timestamp
       ), filtered_jobs_timeline as (
       SELECT * from `region-us.INFORMATION_SCHEMA`.JOBS_TIMELINE_BY_ORGANIZATION f
-      WHERE f.job_creation_time BETWEEN TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 1 DAY) AND CURRENT_TIMESTAMP()
+      WHERE f.job_creation_time BETWEEN TIMESTAMP_ADD({% date_start jobs_timeline_by_organization.date_filter %}, INTERVAL -6 HOUR) AND {% date_end jobs_timeline_by_organization.date_filter %}
       )
           SELECT
               s.timestamp,
@@ -16,7 +16,7 @@ view: concurrency_per_second {
               FULL OUTER JOIN seconds s
               ON s.timestamp  = r.period_start
           WHERE
-              s.timestamp BETWEEN TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 1 DAY) AND CURRENT_TIMESTAMP()
+              s.timestamp BETWEEN TIMESTAMP_ADD({% date_start jobs_timeline_by_organization.date_filter %}, INTERVAL -6 HOUR) AND {% date_end jobs_timeline_by_organization.date_filter %}
             --  and t.job_creation_time BETWEEN TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 1 DAY) AND CURRENT_TIMESTAMP()
           GROUP BY s.timestamp, r.project_id
        ;;
@@ -30,9 +30,14 @@ view: concurrency_per_second {
     drill_fields: [detail*]
   }
 
+  filter: date_window {
+    type: date
+  }
+
   dimension_group: timestamp {
     type: time
     timeframes: [raw,minute5]
+    convert_tz: no
     allow_fill: no
     sql: ${TABLE}.timestamp ;;
   }
