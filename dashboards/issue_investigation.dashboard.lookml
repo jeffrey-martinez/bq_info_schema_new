@@ -1,5 +1,5 @@
-- dashboard: time_window_investigation
-  title: Time Window Investigation
+- dashboard: issue_investigation
+  title: Issue Investigation
   layout: newspaper
   preferred_viewer: dashboards
   elements:
@@ -28,7 +28,7 @@
     single_value_title: GB Processed
     value_format: '#,##0.0,"K"'
     comparison_label: of GB Shuffled to Disk
-    conditional_formatting: [{type: equal to, value: !!null '', background_color: "#3EB0D5",
+    conditional_formatting: [{type: not null, value: !!null '', background_color: "#4285F4",
         font_color: !!null '', color_application: {collection_id: b43731d5-dc87-4a8e-b807-635bef3948e7,
           palette_id: 85de97da-2ded-4dec-9dbd-e6a7d36d5825}, bold: false, italic: false,
         strikethrough: false, fields: !!null ''}]
@@ -64,7 +64,7 @@
       Project ID: jobs_by_organization_raw.project_id
     row: 2
     col: 0
-    width: 11
+    width: 5
     height: 4
   - title: New Tile
     name: New Tile
@@ -86,7 +86,7 @@
     conditional_formatting_include_nulls: false
     single_value_title: Queries Cached
     comparison_label: of Total Queries
-    conditional_formatting: [{type: equal to, value: !!null '', background_color: "#3EB0D5",
+    conditional_formatting: [{type: not null, value: !!null '', background_color: "#4285F4",
         font_color: !!null '', color_application: {collection_id: b43731d5-dc87-4a8e-b807-635bef3948e7,
           palette_id: 85de97da-2ded-4dec-9dbd-e6a7d36d5825}, bold: false, italic: false,
         strikethrough: false, fields: !!null ''}]
@@ -119,14 +119,16 @@
     listen:
       Reporting Period: jobs_by_organization_raw.creation_date
       Project ID: jobs_by_organization_raw.project_id
-    row: 2
-    col: 13
-    width: 11
+    row: 6
+    col: 0
+    width: 5
     height: 4
-  - name: BigQuery Monitoring
+  - name: <font color="#4285F4" size="45" weight="bold"><i class="fa fa-search" aria-hidden="true"></i><strong>Usage
+      Deep Dive</strong>
     type: text
-    title_text: BigQuery Monitoring
-    subtitle_text: How much is being consumed?
+    title_text: <font color="#4285F4" size="4.5" weight="bold"><i class="fa fa-search"
+      aria-hidden="true"></i><strong>Usage Deep Dive</strong>
+    subtitle_text: Slot Consumption against capacity in 5 minute intervals
     body_text: Links to Documentation
     row: 0
     col: 0
@@ -141,7 +143,6 @@
       jobs_timeline_by_organization.project_id]
     pivots: [jobs_timeline_by_organization.project_id]
     fill_fields: [jobs_timeline_by_organization.period_start_minute5]
-    filters: {}
     sorts: [jobs_timeline_by_organization.period_start_minute5 desc, jobs_timeline_by_organization.project_id]
     limit: 500
     query_timezone: America/Los_Angeles
@@ -177,7 +178,7 @@
     listen:
       Reporting Period: jobs_timeline_by_organization.job_creation_time_date
       Project ID: jobs_timeline_by_organization.project_id
-    row: 13
+    row: 10
     col: 0
     width: 24
     height: 6
@@ -188,8 +189,6 @@
     type: looker_line
     fields: [concurrency_per_second.timestamp_minute5, concurrency_per_second.avg_running,
       concurrency_per_second.max_running, concurrency_per_second.max_pending]
-    filters:
-      concurrency_per_second.timestamp_minute5: 6 hours
     sorts: [concurrency_per_second.timestamp_minute5 desc]
     limit: 500
     query_timezone: America/Los_Angeles
@@ -215,24 +214,24 @@
     label_density: 25
     x_axis_scale: auto
     y_axis_combined: true
-    show_null_points: true
+    show_null_points: false
     interpolation: linear
     defaults_version: 1
     listen:
+      Reporting Period: jobs_timeline_by_organization.date_filter
       Project ID: concurrency_per_second.project_id
-    row: 19
+    row: 16
     col: 0
     width: 24
     height: 7
-  - name: Slots vs Commitments
-    title: Slots vs Commitments
+  - title: Slots vs Commitments
+    name: Slots vs Commitments
     model: bigquery_performance_monitoring
     explore: timeline_with_commits
     type: looker_line
     fields: [timeline_with_commits.period_start_minute5, timeline_with_commits.total_slot_5minutes,
       commit_facts.annual_commit, commit_facts.flex_commit, commit_facts.monthly_commit]
     fill_fields: [timeline_with_commits.period_start_minute5]
-    filters: {}
     sorts: [timeline_with_commits.period_start_minute5 desc]
     limit: 500
     query_timezone: America/Los_Angeles
@@ -277,26 +276,33 @@
     totals_color: "#808080"
     listen:
       Reporting Period: timeline_with_commits.job_creation_time_date
-    row: 6
-    col: 0
-    width: 24
-    height: 7
+    row: 2
+    col: 5
+    width: 19
+    height: 8
   filters:
   - name: Reporting Period
     title: Reporting Period
-    type: date_filter
+    type: field_filter
     default_value: 6 hours
     allow_multiple_values: true
     required: false
     ui_config:
       type: advanced
       display: popover
+    model: bigquery_performance_monitoring
+    explore: jobs_timeline_by_organization
+    listens_to_filters: []
+    field: jobs_timeline_by_organization.date_filter
   - name: Project ID
     title: Project ID
     type: field_filter
     default_value: ''
     allow_multiple_values: true
     required: false
+    ui_config:
+      type: advanced
+      display: popover
     model: bigquery_performance_monitoring
     explore: jobs_timeline_by_organization
     listens_to_filters: []

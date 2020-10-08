@@ -157,7 +157,7 @@ dimension: reporting_period {
     sql: ${TABLE}.job_id ;;
     link: {
       label: "Job Lookup Dashboard"
-      url: "/dashboards/3?Job%20Id={{ value }}&filter_config=%7B%22Job%20Id%22:%5B%7B%22type%22:%22%3D%22,%22values%22:%5B%7B%22constant%22:%22{{ value | encode_uri }}%22%7D,%7B%7D%5D,%22id%22:6%7D%5D%7D"
+      url: "/dashboards/10?Job%20Id={{ value }}&filter_config=%7B%22Job%20Id%22:%5B%7B%22type%22:%22%3D%22,%22values%22:%5B%7B%22constant%22:%22{{ value | encode_uri }}%22%7D,%7B%7D%5D,%22id%22:6%7D%5D%7D"
       icon_url: "http://www.looker.com/favicon.ico"
     }
     link: {
